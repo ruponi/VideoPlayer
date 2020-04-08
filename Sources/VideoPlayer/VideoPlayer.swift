@@ -32,6 +32,8 @@ public struct VideoPlayer {
     
     @Binding private var play: Bool
     @Binding private var time: CMTime
+
+    var contentMode: ContentMode
     
     private var config = Config()
     
@@ -40,8 +42,9 @@ public struct VideoPlayer {
     ///   - url: http/https URL
     ///   - play: play/pause
     ///   - time: current time
-    public init(url: URL, play: Binding<Bool>, time: Binding<CMTime> = .constant(.zero)) {
+  public init(url: URL, play: Binding<Bool>, time: Binding<CMTime> = .constant(.zero), contentMode: ContentMode = .fit) {
         self.url = url
+        self.contentMode = contentMode
         _play = play
         _time = time
     }
@@ -82,8 +85,7 @@ public extension VideoPlayer {
         
         var autoReplay: Bool = false
         var mute: Bool = false
-        var contentMode: ContentMode = .fill
-        
+
         var handler: Handler = Handler()
     }
     
@@ -150,7 +152,7 @@ extension VideoPlayer: UIViewRepresentable {
     
     public func makeUIView(context: Context) -> VideoPlayerView {
         let uiView = VideoPlayerView()
-        uiView.contentMode = uiViewContentModeFor(config.contentMode)
+        uiView.contentMode = uiViewContentModeFor(contentMode)
         uiView.playToEndTime = {
             if self.config.autoReplay == false {
                 self.play = false

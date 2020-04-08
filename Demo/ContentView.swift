@@ -9,7 +9,7 @@ import AVFoundation
 import SwiftUI
 import VideoPlayer
 
-private let demoURL = URL(string: "http://clips.vorwaerts-gmbh.de/big_buck_bunny.mp4")!
+private let demoURL = URL(string: "https://content.jwplatform.com/videos/OBJtC214-ZpJQGQMN.mp4")!
 
 struct ContentView : View {
     @State private var play: Bool = true
@@ -44,6 +44,29 @@ struct ContentView : View {
                 .cornerRadius(16)
                 .shadow(color: Color.black.opacity(0.7), radius: 6, x: 0, y: 2)
                 .padding()
+            VideoPlayer(url: demoURL, play: $play, time: $time, contentMode: .fill)
+                  .autoReplay(autoReplay)
+                  .mute(mute)
+                  .onBufferChanged { progress in print("onBufferChanged \(progress)") }
+                  .onPlayToEndTime { print("onPlayToEndTime") }
+                  .onReplay { print("onReplay") }
+                  .onStateChanged { state in
+                      switch state {
+                      case .loading:
+                          self.stateText = "Loading..."
+                      case .playing(let totalDuration):
+                          self.stateText = "Playing!"
+                          self.totalDuration = totalDuration
+                      case .paused(let playProgress, let bufferProgress):
+                          self.stateText = "Paused: play \(Int(playProgress * 100))% buffer \(Int(bufferProgress * 100))%"
+                      case .error(let error):
+                          self.stateText = "Error: \(error)"
+                      }
+                  }
+                  .aspectRatio(1.78, contentMode: .fit)
+                  .cornerRadius(16)
+                  .shadow(color: Color.black.opacity(0.7), radius: 6, x: 0, y: 2)
+                  .padding()
             
             Text(stateText)
                 .padding()
