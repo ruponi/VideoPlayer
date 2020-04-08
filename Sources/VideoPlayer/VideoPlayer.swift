@@ -82,6 +82,7 @@ public extension VideoPlayer {
         
         var autoReplay: Bool = false
         var mute: Bool = false
+        var contentMode: ContentMode = .fill
         
         var handler: Handler = Handler()
     }
@@ -131,12 +132,25 @@ public extension VideoPlayer {
     
 }
 
+#if os(iOS)
+
+func uiViewContentModeFor(_ contentMode: ContentMode) -> UIView.ContentMode {
+  switch contentMode {
+  case .fill:
+    return .scaleAspectFill
+  case .fit:
+    return .scaleAspectFit
+  }
+}
+
+#endif
+
 @available(iOS 13, *)
 extension VideoPlayer: UIViewRepresentable {
     
     public func makeUIView(context: Context) -> VideoPlayerView {
         let uiView = VideoPlayerView()
-        
+        uiView.contentMode = uiViewContentModeFor(config.contentMode)
         uiView.playToEndTime = {
             if self.config.autoReplay == false {
                 self.play = false
