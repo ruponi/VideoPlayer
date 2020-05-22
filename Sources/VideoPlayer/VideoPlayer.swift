@@ -32,7 +32,10 @@ public struct VideoPlayer {
     
     @Binding private var play: Bool
     @Binding private var time: CMTime
-
+    @Binding  public var volume: Float
+    
+    public var isChangeRequired: Bool = false
+    
     var contentMode: ContentMode
     
     private var config = Config()
@@ -42,11 +45,12 @@ public struct VideoPlayer {
     ///   - url: http/https URL
     ///   - play: play/pause
     ///   - time: current time
-  public init(url: URL, play: Binding<Bool>, time: Binding<CMTime> = .constant(.zero), contentMode: ContentMode = .fit) {
+    public init(url: URL, play: Binding<Bool>, time: Binding<CMTime> = .constant(.zero), contentMode: ContentMode = .fit, volume: Binding<Float> = .constant(0.5)) {
         self.url = url
         self.contentMode = contentMode
         _play = play
         _time = time
+        _volume = volume
     }
 }
 
@@ -102,7 +106,11 @@ public extension VideoPlayer {
         view.config.mute = value
         return view
     }
-    
+    func volume(_ value: Float)-> Self  {
+        var view = self
+        view.volume = value
+        return view
+    }
     /// Trigger a callback when the buffer progress changes,
     /// the value is between 0 and 1.
     func onBufferChanged(_ handler: @escaping (Double) -> Void) -> Self {
@@ -187,9 +195,15 @@ extension VideoPlayer: UIViewRepresentable {
         play ? uiView.play(for: url) : uiView.pause(reason: .userInteraction)
         uiView.isMuted = config.mute
         uiView.isAutoReplay = config.autoReplay
-        
-        if let observerTime = context.coordinator.observerTime, time != observerTime {
-            uiView.seek(to: time, toleranceBefore: time, toleranceAfter: time, completion: { _ in })
+        if uiView.volume != Double(volume) {
+            uiView.volume = Double(volume)
+            return
+              }
+        print ("update Player ====")
+        if isChangeRequired {
+            if let observerTime = context.coordinator.observerTime, time != observerTime {
+                uiView.seek(to: time, toleranceBefore: time, toleranceAfter: time, completion: { _ in })
+            }
         }
     }
     
