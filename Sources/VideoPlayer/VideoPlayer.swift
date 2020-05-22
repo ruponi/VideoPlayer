@@ -199,7 +199,7 @@ extension VideoPlayer: UIViewRepresentable {
             uiView.volume = Double(volume)
             return
               }
-        print ("update Player ====")
+       // print ("update Player ====")
         if isChangeRequired {
             if let observerTime = context.coordinator.observerTime, time != observerTime {
                 uiView.seek(to: time, toleranceBefore: time, toleranceAfter: time, completion: { _ in })
